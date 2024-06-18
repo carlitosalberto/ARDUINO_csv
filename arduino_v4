@@ -1,0 +1,30 @@
+import serial
+import csv
+import time
+
+# Configura el puerto serie y la velocidad de baudios
+arduino = serial.Serial('COM3', 9600, timeout=1)
+time.sleep(2)  # Espera a que se establezca la conexión
+
+# Abre (o crea) un archivo CSV para escribir los datos
+with open('datos_arduino.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    # Escribe los nombres de las columnas si es necesario
+    writer.writerow(["Tiempo", "Dato"])
+
+    try:
+        while True:
+            # Recibir datos del Arduino
+            if arduino.inWaiting() > 0:
+                linea = arduino.readline().decode('utf-8').rstrip()
+                print(linea)
+                # Escribe los datos en el archivo CSV con una marca de tiempo
+                writer.writerow([time.strftime("%Y-%m-%d %H:%M:%S"), linea])
+                # Fuerza la escritura en el archivo
+                file.flush()
+
+    except KeyboardInterrupt:
+        print("Lectura finalizada")
+
+# Cierra el puerto serie
+arduino.close()
